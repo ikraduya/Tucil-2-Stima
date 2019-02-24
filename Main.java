@@ -76,6 +76,7 @@ public class Main {
         if (!visited[i-1]) {
           ll.add(i);
           DFS(i, ll);
+          visited[i-1] = false;
           ll.remove(ll.size()-1);
         }
       }    
