@@ -10,17 +10,11 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 public class Main {
-  private static class ArrListInt {
-    public ArrayList<Integer> data;
-    public ArrListInt() {
-      data = new ArrayList<Integer>();
-    }
-  }
-  
   private static int n, m, r;
 
-  private static boolean[] visited, trapIsland;
-  private static ArrListInt[] jMap = null;
+  private static boolean[] visited;
+  // private static boolean[] trapIsland;
+  private static HashMap<Integer, ArrayList<Integer>> jMap = new HashMap<Integer, ArrayList<Integer>>();
   private static HashMap<Integer, ArrayList<String>> trappedMap = new HashMap<Integer, ArrayList<String>>();
 
   public static void main(String[] args) {
@@ -39,21 +33,22 @@ public class Main {
       m = reader.nextInt();
       r = reader.nextInt();
       
-      jMap = new ArrListInt[n];
-      Arrays.setAll(jMap, a -> new ArrListInt());
       for (int i=0; i<m; i++) {
         int asal = reader.nextInt();
         int akhir = reader.nextInt();
-        jMap[asal-1].data.add(akhir-1);
+        if (!jMap.containsKey(asal)) {
+          jMap.put(asal, new ArrayList<Integer>());
+        }
+        (jMap.get(asal)).add(akhir);
       }
       reader.close();
   
       // mark island cluster
       visited = new boolean[n];
-      trapIsland = new boolean[n];
+      // trapIsland = new boolean[n];
       ArrayList<Integer> langkahLog = new ArrayList<>();
       langkahLog.add(r);
-      DFS(r-1, langkahLog);
+      DFS(r, langkahLog);
       
       BufferedWriter writer = new BufferedWriter(new FileWriter(args[1]));
       for (Integer island : trappedMap.keySet()) {
@@ -72,25 +67,28 @@ public class Main {
   }
 
   private static void DFS(int p, ArrayList<Integer> ll) {
-    visited[p] = true;
+    visited[p-1] = true;
 
     boolean trapped = true;
-    for (Integer i : jMap[p].data) {
+    if (jMap.containsKey(p)) {
       trapped = false;
-      if (!visited[i]) {
-        ll.add(i+1);
-        DFS(i, ll);
-        ll.remove(ll.size()-1);
-      }
+      for (Integer i : jMap.get(p)) {
+        if (!visited[i-1]) {
+          ll.add(i);
+          DFS(i, ll);
+          ll.remove(ll.size()-1);
+        }
+      }    
     }
+
     if (trapped) {
-      trapIsland[p] = true;
-      visited[p] = false;
+      // trapIsland[p-1] = true;
+      visited[p-1] = false;
       String sLangkah = Arrays.toString(ll.toArray());
-      if (!trappedMap.containsKey(p+1)) {
-        trappedMap.put(p+1, new ArrayList<String>());
+      if (!trappedMap.containsKey(p)) {
+        trappedMap.put(p, new ArrayList<String>());
       }
-      trappedMap.get(p+1).add(sLangkah);
+      (trappedMap.get(p)).add(sLangkah);
     }
   }
 }
